@@ -1,4 +1,4 @@
-def train_test_shuffled_separation(data, label, train_percent=0.8, valid_percent=0.1):
+def train_test_shuffled_separation(data, label, train_percent=0.8):
     """
     """
     import numpy as np
@@ -6,33 +6,25 @@ def train_test_shuffled_separation(data, label, train_percent=0.8, valid_percent
     # Randomize training set and corresponding labels
     rand_set = np.hstack((label, data))
     np.random.shuffle(rand_set)
-    data = rand_set[:, 1:data.shape[1] + 1]
+    data = rand_set[:, 1:]
     label = rand_set[:, 0]
     print("shuffled data shape:", data.shape, "shuffled label shape:", label.shape)
 
     # specify train and test sizes
-    train_length = int(train_percent * data.shape[0])
-    valid_length = int(valid_percent * train_length)
+    train_length = int(train_percent * len(data))
 
     # index first 80% for training, last 20% for test
-    # also index last 20% of trianing as validation
     data_train = data[0: train_length, :]
     label_train = label[0: train_length]
 
     data_test = data[train_length:, :]
     label_test = label[train_length:]
 
-    data_valid = data_train[0: valid_length, :]
-    label_valid = label_train[0: valid_length]
-    data_train = data_train[valid_length:, :]
-    label_train = label_train[valid_length:]
+    print('# train:', len(data_train))
+    print('# test: ', len(data_test))
+    print('# total:', len(data))
 
-    print('# train:', data_train.shape[0])
-    print('# valid:', data_valid.shape[0])
-    print('# test:', data_test.shape[0])
-    print('# total:', data.shape[0])
-
-    return data_train, label_train, data_valid, label_valid, data_test, label_test
+    return data_train, label_train, data_test, label_test
 
 
 def normalize_data(data, min=0, max=1):
@@ -53,3 +45,52 @@ def normalize_data(data, min=0, max=1):
     scaled = scaled.astype(np.float64)
 
     return scaled
+
+
+def label_to_one_hot(label, num_of_class=2):
+    """
+    converts 1d array to 2d binary one hot labels
+    (n, ) to (n, 2)
+    :param label:
+    :return:
+    """
+    import numpy as np
+    one_hot = np.zeros((len(label), num_of_class), dtype=np.uint8)
+    for i in range(len(label)):
+        one_hot[i, int(label[i] - 1)] = 1  # label is 1 and 2
+
+    return one_hot
+
+
+def plot_history(history):
+    """
+
+    :param history:
+    :return:
+    """
+    import matplotlib.pyplot as plt
+    # Plot training & validation accuracy values
+    plt.plot(history.history['acc'])
+    plt.plot(history.history['val_acc'])
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.show()
+
+    # Plot training & validation loss values
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.show()
+
+
+if __name__ == "__main__":
+    import numpy as np
+
+    # labels = np.ones((10))*2
+    # hot = label_to_one_hot(labels)
+    pass
